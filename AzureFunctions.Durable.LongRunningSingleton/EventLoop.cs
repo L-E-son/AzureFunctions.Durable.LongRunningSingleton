@@ -9,7 +9,7 @@ namespace AzureFunctions.Durable.LongRunningSingleton
 {
     public sealed class EventLoop
     {
-        private const string NCronTabEveryFiveMinutesExpression = "*/5 * * * *";
+        private const string NCronTabEveryFiveMinutesExpression = "0 */5 * * * *";
 
         private readonly ILogger _logger;
 

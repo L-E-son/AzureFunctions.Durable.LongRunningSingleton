@@ -20,7 +20,7 @@ namespace AzureFunctions.Durable.LongRunningSingleton
         // A timer event that generates sample data.
         [FunctionName(nameof(HandleTimerEvent))]
         public async Task HandleTimerEvent(
-            [TimerTrigger("*/1 * * * *")] TimerInfo timer,
+            [TimerTrigger("0 */1 * * * *")] TimerInfo timer,
             [DurableClient] IDurableOrchestrationClient orchestrationClient,
             CancellationToken cancellationToken)
         {
