@@ -28,12 +28,45 @@ namespace AzureFunctions.Durable.LongRunningSingleton
 
             var myMockEvent = new EventData($"Event #{approxTicksAtExecution},", "Here's some content!");
 
+            await PrimeEventLoop(orchestrationClient);
+
             await orchestrationClient.RaiseEventAsync(
                 instanceId: OrchestrationConstants.SingletonInstanceId,
                 eventName: nameof(EventHandler.HandleTimerEvent),
                 eventData: myMockEvent);
         }
 
-        // OTHER FUNCTION TRIGGERS GO HERE: EventHubTrigger, BlobTrigger, etc.
+        /// <summary>
+        /// Prepares the event loop, if it is not already running.
+        /// </summary>
+        /// <param name="orchestrationClient">The orchestration client to start a new instance with, if necessary.</param>
+        /// <returns>A task representing the completion of the work.</returns>
+        private static async Task PrimeEventLoop(IDurableOrchestrationClient orchestrationClient)
+        {
+            var isEventLoopActive = await IsSingletonInstanceRunning(orchestrationClient);
+
+            if (isEventLoopActive)
+            {
+                return;
+            }
+
+            // Prime message loop if it is not running
+            await orchestrationClient.StartNewAsync(
+                orchestratorFunctionName: nameof(Orchestration.ProcessEvent),
+                instanceId: OrchestrationConstants.SingletonInstanceId);
+        }
+
+        private static async Task<bool> IsSingletonInstanceRunning(IDurableOrchestrationClient starter)
+        {
+            var instance = await starter.GetStatusAsync(instanceId: OrchestrationConstants.SingletonInstanceId);
+
+            var orchestrationNotRunning =
+                instance is null
+                || instance.RuntimeStatus == OrchestrationRuntimeStatus.Completed
+                || instance.RuntimeStatus == OrchestrationRuntimeStatus.Failed
+                || instance.RuntimeStatus == OrchestrationRuntimeStatus.Terminated;
+
+            return !orchestrationNotRunning;
+        }
     }
 }
