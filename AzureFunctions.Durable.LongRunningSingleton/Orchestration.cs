@@ -36,6 +36,8 @@ namespace AzureFunctions.Durable.LongRunningSingleton
                 _logger.LogError(ex, "Exception occurred in orchestration loop.");
                 _telemetryClient.TrackException(ex);
             }
+
+            context.ContinueAsNew(input: null, preserveUnprocessedEvents: true);
         }
     }
 }
