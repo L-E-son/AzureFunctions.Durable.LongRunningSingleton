@@ -18,6 +18,10 @@ namespace AzureFunctions.Durable.LongRunningSingleton
         }
 
         // A timer event that generates sample data.
+        /// <remarks>
+        /// This can be any type of trigger, but a TimerTrigger
+        /// doesn't require storage configuration to set up.
+        /// </remarks>
         [FunctionName(nameof(HandleTimerEvent))]
         public async Task HandleTimerEvent(
             [TimerTrigger("0 */1 * * * *")] TimerInfo timer,
